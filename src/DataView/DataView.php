@@ -2,6 +2,8 @@
 
 namespace DataView;
 
+use DataView\Adapter\IAdapter;
+
 class DataView
 {
 	const SORT_ORDER_ASCENDING = 'ascending';
@@ -13,9 +15,9 @@ class DataView
 	/**
 	 * Adapter injected here
 	 */
-	public function __construct($adapter)
+	public function __construct(IAdapter $adapter)
 	{
-
+		$this->adapter = $adapter;
 	}
 
 	/**
@@ -46,8 +48,8 @@ class DataView
 	/**
 	 * Gets the results from the adapter
 	 */
-	public function getResults()
+	public function getPager()
 	{
-		$this->adapter->getResults($this->filters);
+		$this->adapter->getPager($this->filters);
 	}
 }
