@@ -2,20 +2,20 @@
 
 namespace DataView;
 
-use DataView\Adapter\IAdapter;
+use DataView\Adapter\AdapterInterface;
 
 class DataView
 {
 	const SORT_ORDER_ASCENDING = 'ascending';
 	const SORT_ORDER_DESCENDING = 'descending';
 
-	private $source, $orderByColumnName, $sortOrder = null;
+	private $orderByColumnName, $sortOrder = null;
 	private $filters = array();
 
 	/**
 	 * Adapter injected here
 	 */
-	public function __construct(IAdapter $adapter)
+	public function __construct(AdapterInterface $adapter)
 	{
 		$this->adapter = $adapter;
 	}
@@ -25,7 +25,7 @@ class DataView
 	 */
 	public function setSource($source)
 	{
-		$this->source = $source;
+		$this->adapter->setSource($source);
 	}
 
 	/**
@@ -34,6 +34,14 @@ class DataView
 	public function addFilter(Filter $filter)
 	{
 		$this->filters[] = $filter;
+	}
+
+	/**
+	 * Assign a set of filters
+	 */
+	public function setFilters($filters)
+	{
+		$this->filters = $filters;
 	}
 
 	/**
@@ -50,6 +58,14 @@ class DataView
 	 */
 	public function getPager()
 	{
-		$this->adapter->getPager($this->filters);
+		if(!$this->adapter->getSource()) {
+			throw new \Exception('Please set a source to fetch the results from');
+		}
+
+		$this->adapter->setFilters($this->filters);
+
+		return $this->adapter->getPager(
+			$this->adapter->getQuery()
+		);
 	}
 }

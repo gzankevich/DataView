@@ -5,10 +5,15 @@ namespace DataView\Adapter;
 /**
  * Doctrine ORM adapter
  */
-class DoctrineORM implements IAdapter
+class DoctrineORM implements AdapterInterface
 {
-	protected $source, $tableName = null;
+	protected $source, $tableName, $entityManager = null;
 	protected $filters = array();
+
+	public function __construct($entityManager)
+	{
+		$this->entityManager = $entityManager;
+	}
 
 	/**
 	 * {@inheritdoc}
@@ -21,35 +26,78 @@ class DoctrineORM implements IAdapter
 	/**
 	 * Apply the filters to the queryBuilder and return a query which Pagerfanta can work with
 	 */
-	protected function getQuery()
+	public function getQuery()
 	{
-		// modify $queryBuilder with $filters
+		$queryBuilder = null;
 
-		return $queryBuilder->getQuery();
+		if(is_string($this->source)) {
+			// source is a table name
+			// use any value for the alias, applyFilters() will autodetect it
+			$queryBuilder = $this->entityManager->getRepository($this->source)->createQueryBuilder('__anything__');
+
+		} else {
+			// source is a QueryBuilder
+			$queryBuilder = $this->source;
+		}
+
+		return $this->applyFilters($queryBuilder);
+	}
+
+	protected function applyFilters($queryBuilder)
+	{
+		$alias = $this->getAliasFromQueryBuilder($queryBuilder);
+
+		foreach($this->filters as $key => $f) {
+			$parameterName = "param_{$key}";
+
+			// build a where clause that looks something like:
+			// __anything__.name = :param_0
+			$queryBuilder->andWhere("{$alias}.{$f->getColumnName()} {$f->getComparisonType()} :{$parameterName}");
+			// bind the parameter - this will protect against SQL injection
+			$queryBuilder->setParameter($parameterName, $f->getCompareValue());
+		}
+
+		return $queryBuilder;
+	}
+
+	protected function getAliasFromQueryBuilder($queryBuilder)
+	{
+		$dqlSelectParts = $queryBuilder->getDqlPart('select');
+		$parts = $dqlSelectParts[0]->getParts();
+
+		return $parts[0];
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * Set the source to fetch results from
+	 *
+	 * This can be a:
+	 * - String containing the table/entity name
+	 * - QueryBuilder instance
 	 */
-	public function getPager()
-	{
-		$pager = new Pagerfanta(new DoctrineORMAdapter($this->getQuery()));
-
-		return $pager;
-	}
-
 	public function setSource($source)
 	{
 		$this->source = $source;
 	}
 
+	public function getSource()
+	{
+		return $this->source;
+	}
+
+	/**
+	 * Assign a set of filters
+	 */
 	public function setFilters($filters)
 	{
 		$this->filters = $filters;
 	}
 
-	public function addFilter($filter)
+	/**
+	 * Gets a pager instance
+	 */
+	public function getPager($query)
 	{
-		$this->filters[] = $filter;
+		return new \Pagerfanta\Pagerfanta(new \Pagerfanta\Adapter\DoctrineORMAdapter($query));
 	}
 }

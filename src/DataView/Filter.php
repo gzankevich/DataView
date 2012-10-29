@@ -4,12 +4,19 @@ namespace DataView;
 
 class Filter
 {
-	const COMPARISON_TYPE_EQUAL = 'equal';
-	const COMPARISON_TYPE_NOT_EQUAL = 'not equal';
-	const COMPARISON_TYPE_GREATER_THAN = 'greater than';
-	const COMPARISON_TYPE_LESS_THAN = 'less than';
+	const COMPARISON_TYPE_EQUAL = '=';
+	const COMPARISON_TYPE_NOT_EQUAL = '!=';
+	const COMPARISON_TYPE_GREATER_THAN = '>';
+	const COMPARISON_TYPE_LESS_THAN = '<';
 
 	private $columnName, $comparisonType, $compareValue;
+
+	public function __construct($columnName, $comparisonType, $compareValue)
+	{
+		$this->columnName = $columnName;
+		$this->comparisonType = $comparisonType;
+		$this->compareValue = $compareValue;
+	}
 
 	/**
 	 * Set the name of the column to filter on

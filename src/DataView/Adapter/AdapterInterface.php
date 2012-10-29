@@ -2,7 +2,7 @@
 
 namespace DataView\Adapter;
 
-interface IAdapter
+interface AdapterInterface
 {
 	/**
 	 * Get the columns defined on an entity/document
@@ -12,9 +12,9 @@ interface IAdapter
 	/**
 	 * Get the results from the query builder + filters
 	 *
-	 * The result of this is passed to Pagerfanta later.
+	 * The result of this is passed to Pagerfanta by DataView.
 	 */
-	public function getPager();
+	public function getQuery();
 
 	/**
 	 * Set the source 
@@ -24,6 +24,4 @@ interface IAdapter
 	public function setSource($source);
 
 	public function setFilters($filters);
-
-	public function addFilter($filter);
 }
