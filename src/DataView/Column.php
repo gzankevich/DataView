@@ -33,7 +33,7 @@ class Column
 	 * Can be used to customize how, for example, many-to-many associations are presented (e.g. in an unordered list).
 	 * @var string
 	 */
-   	private $template = null;
+	private $template = null;
 
 	/**
 	 * Constructor
