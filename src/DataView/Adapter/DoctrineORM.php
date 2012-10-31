@@ -2,6 +2,8 @@
 
 namespace DataView\Adapter;
 
+use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Pagerfanta;
 use DataView\SourceNotSetException;
 
 /**
@@ -9,21 +11,21 @@ use DataView\SourceNotSetException;
  */
 class DoctrineORM implements AdapterInterface
 {
-	protected $source, $tableName, $entityManager, $orderByPropertyPath, $sortOrder = null;
-	protected $filters, $joinsMade = array();
+    protected $source, $tableName, $entityManager, $orderByPropertyPath, $sortOrder = null;
+    protected $filters, $joinsMade = array();
 
-	public function __construct($entityManager)
-	{
-		$this->entityManager = $entityManager;
-	}
+    public function __construct($entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getColumns($entity)
-	{
+    /**
+     * {@inheritdoc}
+     */
+    public function getColumns($entity)
+    {
 
-	}
+    }
 
 	/**
 	 * {@inheritdoc}
@@ -86,7 +88,7 @@ class DoctrineORM implements AdapterInterface
 		$columnNameParts = explode('.', $propertyPath);
 
 		var_dump($propertyPath);
-		
+
 		// TODO this needs to work recursively in case the columnName looks like association_one.association_two.actual_column
 		// if count($columnNameParts) > 2 then recurse
 		var_dump(count($columnNameParts));
@@ -152,9 +154,9 @@ class DoctrineORM implements AdapterInterface
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getPager($query)
+	public function getPager()
 	{
-		return new \Pagerfanta\Pagerfanta(new \Pagerfanta\Adapter\DoctrineORMAdapter($query));
+		return new Pagerfanta(new DoctrineORMAdapter($this->getQuery()));
 	}
 
 	/**

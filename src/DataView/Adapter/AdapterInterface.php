@@ -2,53 +2,62 @@
 
 namespace DataView\Adapter;
 
+use Pagerfanta\Pagerfanta;
+
 /**
  * Interface for ORM/ODM adapters
  *
  * @package DataView
  * @subpackage Adapter
- * @author George Zankevich <gzankevich@gmail.com> 
+ * @author George Zankevich <gzankevich@gmail.com>
  */
 interface AdapterInterface
 {
-	/**
-	 * Get the results from the query builder + filters
-	 *
-	 * The result of this is passed to Pagerfanta by DataView.
-	 *
-	 * @return Query
-	 */
-	public function getQuery();
+    /**
+     * Get the results from the query builder + filters
+     *
+     * The result of this is passed to Pagerfanta by DataView.
+     *
+     * @return Query
+     */
+    public function getQuery();
 
-	/**
-	 * Can be a query builder, entity name, array (depends on what the adapter supports)
-	 *
-	 * @param mixed $source The source
-	 * @return null
-	 */
-	public function setSource($source);
+    /**
+     * Can be a query builder, entity name, array (depends on what the adapter supports)
+     *
+     * @param mixed $source The source
+     * @return null
+     */
+    public function setSource($source);
 
-	/**
-	 * Returns the source
-	 *
-	 * @return mixed The source
-	 */
-	public function getSource();
+    /**
+     * Returns the source
+     *
+     * @return mixed The source
+     */
+    public function getSource();
 
-	/**
-	 * Set the filters to apply
-	 *
-	 * @param array $filters The filters
-	 * @return null
-	 */
-	public function setFilters($filters);
+    /**
+     * Set the filters to apply
+     *
+     * @param array $filters The filters
+     * @return null
+     */
+    public function setFilters($filters);
 
-	/**
-	 * Set the order by column and the sort order
-	 *
-	 * @param string $propertyPath The property path of the column to order by
-	 * @param string $sortOrder Ascending or descending
-	 * @return null
-	 */
-	public function setOrderBy($propertyPath, $sortOrder);
+    /**
+     * Set the order by column and the sort order
+     *
+     * @param string $propertyPath The property path of the column to order by
+     * @param string $sortOrder Ascending or descending
+     * @return null
+     */
+    public function setOrderBy($propertyPath, $sortOrder);
+
+    /**
+     * Get the pager.
+     *
+     * @return Pagerfanta
+     */
+    public function getPager();
 }
