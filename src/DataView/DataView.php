@@ -4,16 +4,27 @@ namespace DataView;
 
 use DataView\Adapter\AdapterInterface;
 
+/**
+ * Given a source, this class can apply a set of filters and sort it into a paginated list.
+ *
+ * @package DataView
+ * @author George Zankevich <gzankevich@gmail.com> 
+ */
 class DataView
 {
 	const SORT_ORDER_ASCENDING = 'ascending';
 	const SORT_ORDER_DESCENDING = 'descending';
 
-	private $orderByColumnName, $sortOrder = null;
-	private $filters = array();
+	private $orderByPropertyPath, $sortOrder = null;
+	private $filters, $columns = array();
 
 	/**
-	 * Adapter injected here
+	 * Constructor
+	 *
+	 * The ORM/ODM adapter is injected here.
+	 *
+	 * @param AdapterInterface $adapter The adapter to use (e.g. DoctrineORM)
+	 * @return null
 	 */
 	public function __construct(AdapterInterface $adapter)
 	{
@@ -21,7 +32,10 @@ class DataView
 	}
 
 	/**
-	 * Can be a query builder, entity name, array
+	 * Can be a query builder, entity name, array (depends on what the adapter supports)
+	 *
+	 * @param mixed $source The source
+	 * @return null
 	 */
 	public function setSource($source)
 	{
@@ -30,6 +44,9 @@ class DataView
 
 	/**
 	 * Add a filter
+	 *
+	 * @param Filter $filter The filter to add
+	 * @return null
 	 */
 	public function addFilter(Filter $filter)
 	{
@@ -38,6 +55,9 @@ class DataView
 
 	/**
 	 * Assign a set of filters
+	 *
+	 * @param array $filters The filters to set
+	 * @return null
 	 */
 	public function setFilters($filters)
 	{
@@ -45,16 +65,44 @@ class DataView
 	}
 
 	/**
-	 * Set the order by column and the sort order
+	 * Add a filter
+	 *
+	 * @param Column $column The column to add
+	 * @return null
 	 */
-	public function setOrderBy($columnName, $sortOrder)
+	public function addColumn(Column $column)
 	{
-		$this->orderByColumnName = $columnName;
+		$this->columns[] = $column;
+	}
+
+	/**
+	 * Assign a set of filters
+	 *
+	 * @param array $columns The columns to set
+	 * @return null
+	 */
+	public function setColumns($columns)
+	{
+		$this->columns = $columns;
+	}
+
+	/**
+	 * Set the order by column and the sort order
+	 *
+	 * @param string $propertyPath The property path of the column to order by
+	 * @param string $sortOrder Ascending or descending
+	 * @return null
+	 */
+	public function setOrderBy($propertyPath, $sortOrder)
+	{
+		$this->orderByPropertyPath = $propertyPath;
 		$this->sortOrder = $sortOrder;
 	}
 
 	/**
-	 * Gets the results from the adapter
+	 * Gets the results from the adapter in a pager
+	 *
+	 * @return Pagerfanta A pager
 	 */
 	public function getPager()
 	{
@@ -63,6 +111,7 @@ class DataView
 		}
 
 		$this->adapter->setFilters($this->filters);
+		$this->adapter->setOrderBy($this->orderByPropertyPath, $this->sortOrder);
 
 		return $this->adapter->getPager(
 			$this->adapter->getQuery()
