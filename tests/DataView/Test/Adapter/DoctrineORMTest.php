@@ -1,4 +1,5 @@
 <?php
+namespace DataView\Test\Adapter;
 
 use DataView\Adapter\DoctrineORM;
 
@@ -10,7 +11,7 @@ class DoctrineORMGetQueryTest extends DoctrineORM
     }
 }
 
-class DoctrineORMTest extends \PhpUnit_Framework_TestCase
+class DoctrineORMTest extends \PHPUnit_Framework_TestCase
 {
     public function testJoinRelations()
     {
