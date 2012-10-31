@@ -1,0 +1,15 @@
+<?php
+
+$vendorDir = __DIR__.'/../..';
+require_once($vendorDir.'/symfony/symfony/src/Symfony/Component/ClassLoader/UniversalClassLoader.php');
+
+use Symfony\Component\ClassLoader\UniversalClassLoader;
+
+$classLoader = new UniversalClassLoader();
+$classLoader->registerNamespaces(array(
+    'DataView\Tests' => __DIR__,
+    'DataView'       => __DIR__.'/../src',
+    'Doctrine\ORM'   => $vendorDir.'/doctrine-orm/lib',
+));
+
+$classLoader->register();

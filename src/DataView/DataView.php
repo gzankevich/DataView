@@ -107,7 +107,7 @@ class DataView
 	public function getPager()
 	{
 		if(!$this->adapter->getSource()) {
-			throw new \Exception('Please set a source to fetch the results from');
+			throw new SourceNotSetException('Please set a source to fetch the results from');
 		}
 
 		$this->adapter->setFilters($this->filters);

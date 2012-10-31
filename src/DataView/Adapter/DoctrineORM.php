@@ -2,6 +2,8 @@
 
 namespace DataView\Adapter;
 
+use DataView\SourceNotSetException;
+
 /**
  * Doctrine ORM adapter
  */
@@ -29,7 +31,7 @@ class DoctrineORM implements AdapterInterface
 	public function getQuery()
 	{
 		if(!$this->source) {
-			throw new \Exception("No source has been set");
+			throw new SourceNotSetException('Please set a source to fetch the results from');
 		}
 
 		$queryBuilder = null;
