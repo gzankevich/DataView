@@ -1,0 +1,29 @@
+{
+    "name": "free-office-finder/data-view",
+    "description": "Data view library",
+    "authors": [
+        {
+            "name": "George Zankevich",
+            "email": "gzankevich@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "pagerfanta/pagerfanta": "dev-master"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*@stable"
+    },
+    "suggest": {
+        "doctrine/orm": "2.3.*"
+    },
+    "config": {
+        "bin-dir": "bin/"
+    },
+    "autoload": {
+        "psr-0": {
+            "DataView": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
