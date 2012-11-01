@@ -5,6 +5,10 @@
         {
             "name": "George Zankevich",
             "email": "gzankevich@gmail.com"
+        },
+        {
+            "name": "Martin Parsiegla",
+            "email": "martin.parsiegla@gmail.com"
         }
     ],
     "require": {

@@ -14,15 +14,6 @@ use Pagerfanta\Pagerfanta;
 interface AdapterInterface
 {
     /**
-     * Get the results from the query builder + filters
-     *
-     * The result of this is passed to Pagerfanta by DataView.
-     *
-     * @return Query
-     */
-    public function getQuery();
-
-    /**
      * Can be a query builder, entity name, array (depends on what the adapter supports)
      *
      * @param mixed $source The source

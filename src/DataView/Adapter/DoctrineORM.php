@@ -27,10 +27,14 @@ class DoctrineORM implements AdapterInterface
 
     }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getQuery()
+    /**
+     * Get the results from the query builder + filters
+     *
+     * The result of this is passed to Pagerfanta by DataView.
+     *
+     * @return Query
+     */
+	protected function getQuery()
 	{
 		if(!$this->source) {
 			throw new SourceNotSetException('Please set a source to fetch the results from');
@@ -43,9 +47,11 @@ class DoctrineORM implements AdapterInterface
 			// use any value for the alias, applyFilters() will autodetect it
 			$queryBuilder = $this->entityManager->getRepository($this->source)->createQueryBuilder('__entity__');
 
-		} else {
+		} elseif($this->source instanceOf \Doctrine\ORM\QueryBuilder) {
 			// source is a QueryBuilder
 			$queryBuilder = $this->source;
+		} else {
+			throw new InvalidSourceException('Invalid source of type '.is_object($this->source) ? get_class($this->source) : gettype($this->source).' cannot be processed by the DoctrineORM adapter');
 		}
 
 		return $this->applyFilters($queryBuilder);
@@ -89,8 +95,6 @@ class DoctrineORM implements AdapterInterface
 
 		var_dump($propertyPath);
 
-		// TODO this needs to work recursively in case the columnName looks like association_one.association_two.actual_column
-		// if count($columnNameParts) > 2 then recurse
 		var_dump(count($columnNameParts));
 		if(count($columnNameParts) > 2) {
 			if(!in_array("{$columnNameParts[0]}.{$columnNameParts[1]}", $this->joinsMade)) {

@@ -1,6 +1,10 @@
 <?php
 
-if (!$loader = @include __DIR__.'/../vendor/autoload.php') {
+/**
+ * Note: these tests assume that this library has been installed as a Symfony2 vendor
+ */
+
+if (!$loader = @include __DIR__.'/../../../vendor/autoload.php') {
     echo <<<EOM
 You must set up the project dependencies by running the following commands:
 
