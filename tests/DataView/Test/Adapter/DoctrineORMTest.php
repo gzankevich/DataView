@@ -2,6 +2,7 @@
 namespace DataView\Test\Adapter;
 
 use DataView\Filter;
+use DataView\DataView;
 use DataView\Adapter\DoctrineORM;
 
 class TestDoctrineORMGetQuery extends DoctrineORM
@@ -14,6 +15,11 @@ class TestDoctrineORMGetQuery extends DoctrineORM
     protected function applyFilters($queryBuilder)
     {
         return $queryBuilder;
+    }
+
+    protected function getAliasFromQueryBuilder($queryBuilder)
+    {
+        return 'x';
     }
 }
 
@@ -35,9 +41,9 @@ class TestDoctrineORMJoinRelations extends DoctrineORM
 
 class TestDoctrineORMApplyFilters extends DoctrineORM
 {
-	public function applyFilters($queryBuilder)
+	public function applyFilters($queryBuilder, $alias)
     {
-        return parent::applyFilters($queryBuilder);
+        return parent::applyFilters($queryBuilder, $alias);
     }
 
 	protected function getAliasFromQueryBuilder($queryBuilder)
@@ -46,9 +52,16 @@ class TestDoctrineORMApplyFilters extends DoctrineORM
     }
 }
 
+class TestDoctrineORMApplyOrderBy extends DoctrineORM
+{
+	public function applyOrderBy($queryBuilder, $alias)
+    {
+        return parent::applyOrderBy($queryBuilder, $alias);
+    }
+}
+
 class DoctrineORMTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @covers DataView\Adapter\DoctrineORM::joinRelations
      */
@@ -119,7 +132,7 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
 
         $doctrineORM = new TestDoctrineORMApplyFilters(null, null, null);
         $doctrineORM->setFilters(array(new Filter('foo.bar', Filter::COMPARISON_TYPE_EQUAL, 123)));
-        $doctrineORM->applyFilters($queryBuilder);
+        $doctrineORM->applyFilters($queryBuilder, 'x');
     }
 
     /**
@@ -141,13 +154,21 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetQuery_tableName()
     {
+        $queryBuilder = $this->getMockBuilder('Doctrine\ORM\QueryBuilder')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $queryBuilder
+            ->expects($this->once())
+            ->method('getQuery')
+            ->will($this->returnValue('test'));
+
         $repository = $this->getMockBuilder('Doctrine\ORM\EntityRepository')
 			->disableOriginalConstructor()
             ->getMock();
         $repository
             ->expects($this->once())
             ->method('createQueryBuilder')
-            ->will($this->returnValue('test'));
+            ->will($this->returnValue($queryBuilder));
 
         $entityManager = $this->getMockBuilder('Doctrine\ORM\EntityManager')
 			->disableOriginalConstructor()
@@ -174,11 +195,51 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
         $queryBuilder = $this->getMockBuilder('Doctrine\ORM\QueryBuilder')
             ->disableOriginalConstructor()
             ->getMock();
+        $queryBuilder
+            ->expects($this->once())
+            ->method('getQuery')
+            ->will($this->returnValue('test'));
 
         $doctrineORM = new TestDoctrineORMGetQuery(null);
         $doctrineORM->setSource($queryBuilder);
         $query = $doctrineORM->getQuery();
 
-        $this->assertEquals($queryBuilder, $query);
+        $this->assertEquals('test', $query);
+    }
+
+    /**
+     * @covers DataView\Adapter\DoctrineORM::applyOrderBy
+     */
+    public function testApplyOrderBy_nonRelation()
+    {
+        $queryBuilder = $this->getMockBuilder('Doctrine\ORM\QueryBuilder')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $queryBuilder
+            ->expects($this->once())
+            ->method('add')
+            ->with($this->equalTo('orderBy'), $this->equalTo('x.foo DESC'));
+
+        $doctrineORM = new TestDoctrineORMApplyOrderBy(null);
+        $doctrineORM->setOrderBy('foo', DataView::SORT_ORDER_DESCENDING);
+        $doctrineORM->applyOrderBy($queryBuilder, 'x');
+    }
+
+    /**
+     * @covers DataView\Adapter\DoctrineORM::applyOrderBy
+     */
+    public function testApplyOrderBy_relation()
+    {
+        $queryBuilder = $this->getMockBuilder('Doctrine\ORM\QueryBuilder')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $queryBuilder
+            ->expects($this->once())
+            ->method('add')
+            ->with($this->equalTo('orderBy'), $this->equalTo('foo.bar DESC'));
+
+        $doctrineORM = new TestDoctrineORMApplyOrderBy(null);
+        $doctrineORM->setOrderBy('foo.bar', DataView::SORT_ORDER_DESCENDING);
+        $doctrineORM->applyOrderBy($queryBuilder, 'x');
     }
 }

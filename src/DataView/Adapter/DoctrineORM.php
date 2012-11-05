@@ -54,16 +54,37 @@ class DoctrineORM implements AdapterInterface
 			throw new InvalidSourceException('Invalid source of type '.is_object($this->source) ? get_class($this->source) : gettype($this->source).' cannot be processed by the DoctrineORM adapter');
 		}
 
-		return $this->applyFilters($queryBuilder);
+		$alias = $this->getAliasFromQueryBuilder($queryBuilder);
+
+		$queryBuilder = $this->applyFilters($queryBuilder, $alias);
+		$queryBuilder = $this->applyOrderBy($queryBuilder, $alias);
+
+		return $queryBuilder->getQuery();
+	}
+
+	protected function applyOrderBy($queryBuilder, $alias)
+	{
+		if(!$this->orderByPropertyPath && !$this->sortOrder) {
+			return $queryBuilder;
+		}
+
+		if(strpos($this->orderByPropertyPath, '.') !== false) {
+			// we're referencing a relation, do not append the main entity's alias
+			$queryBuilder->add('orderBy', "{$this->orderByPropertyPath} {$this->sortOrder}");
+
+		} else {
+			$queryBuilder->add('orderBy', "{$alias}.{$this->orderByPropertyPath} {$this->sortOrder}");
+
+		}
+
+		return $queryBuilder;
 	}
 
 	/**
 	 * Applies the filters to the QueryBuilder instance
 	 */
-	protected function applyFilters($queryBuilder)
+	protected function applyFilters($queryBuilder, $alias)
 	{
-		$alias = $this->getAliasFromQueryBuilder($queryBuilder);
-
 		foreach($this->filters as $key => $f) {
 			$parameterName = "param_{$key}";
 

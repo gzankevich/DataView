@@ -13,8 +13,8 @@ use Pagerfanta\Pagerfanta;
  */
 class DataView
 {
-    const SORT_ORDER_ASCENDING = 'ascending';
-    const SORT_ORDER_DESCENDING = 'descending';
+    const SORT_ORDER_ASCENDING = 'ASC';
+    const SORT_ORDER_DESCENDING = 'DESC';
 
     private $orderByPropertyPath = null;
     private $sortOrder = null;
