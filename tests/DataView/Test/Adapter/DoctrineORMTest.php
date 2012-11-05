@@ -1,9 +1,10 @@
 <?php
 namespace DataView\Test\Adapter;
 
+use DataView\Filter;
 use DataView\Adapter\DoctrineORM;
 
-class DoctrineORMGetQueryTest extends DoctrineORM
+class TestDoctrineORMGetQuery extends DoctrineORM
 {
 	public function getQuery()
     {
@@ -16,11 +17,32 @@ class DoctrineORMGetQueryTest extends DoctrineORM
     }
 }
 
-class DoctrineORMGetAliasFromQueryBuilderTest extends DoctrineORM
+class TestDoctrineORMGetAliasFromQueryBuilder extends DoctrineORM
 {
 	public function getAliasFromQueryBuilder($queryBuilder)
     {
         return parent::getAliasFromQueryBuilder($queryBuilder);
+    }
+}
+
+class TestDoctrineORMJoinRelations extends DoctrineORM
+{
+	public function joinRelations($propertyPath, $queryBuilder)
+    {
+        return parent::joinRelations($propertyPath, $queryBuilder);
+    }
+}
+
+class TestDoctrineORMApplyFilters extends DoctrineORM
+{
+	public function applyFilters($queryBuilder)
+    {
+        return parent::applyFilters($queryBuilder);
+    }
+
+	protected function getAliasFromQueryBuilder($queryBuilder)
+    {
+        return 'x';
     }
 }
 
@@ -32,6 +54,18 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
      */
     public function testJoinRelations()
     {
+        // mock query builder - expect two calls to join()
+        $queryBuilder = $this->getMockBuilder('Doctrine\ORM\QueryBuilder')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $queryBuilder
+            ->expects($this->once())
+            ->method('join')
+            ->with($this->equalTo('foo.bar'));
+
+        $doctrineORM = new TestDoctrineORMJoinRelations(null, null, null);
+        $doctrineORM->joinRelations('foo.bar.baz', $queryBuilder);
     }
 
     /**
@@ -59,7 +93,7 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($dqlSelectParts));
 
 
-        $doctrineORM = new DoctrineORMGetAliasFromQueryBuilderTest(null);
+        $doctrineORM = new TestDoctrineORMGetAliasFromQueryBuilder(null);
         $alias = $doctrineORM->getAliasFromQueryBuilder($queryBuilder);
 
         $this->assertEquals('foo', $alias);
@@ -70,7 +104,22 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
      */
     public function testApplyFilters()
     {
+        // mock query builder - expect two calls to join()
+        $queryBuilder = $this->getMockBuilder('Doctrine\ORM\QueryBuilder')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $queryBuilder
+            ->expects($this->once())
+            ->method('andWhere')
+            ->with($this->equalTo('foo.bar = :param_0'));
+        $queryBuilder
+            ->expects($this->once())
+            ->method('setParameter')
+            ->with($this->equalTo('param_0'), $this->equalTo(123));
 
+        $doctrineORM = new TestDoctrineORMApplyFilters(null, null, null);
+        $doctrineORM->setFilters(array(new Filter('foo.bar', Filter::COMPARISON_TYPE_EQUAL, 123)));
+        $doctrineORM->applyFilters($queryBuilder);
     }
 
     /**
@@ -81,7 +130,7 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
     public function testGetQuery_noSource()
     {
         $this->setExpectedException('DataView\SourceNotSetException');
-        $doctrineORM = new DoctrineORMGetQueryTest(null);
+        $doctrineORM = new TestDoctrineORMGetQuery(null);
         $doctrineORM->getQuery();
     }
 
@@ -108,7 +157,7 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
             ->method('getRepository')
             ->will($this->returnValue($repository));
 
-        $doctrineORM = new DoctrineORMGetQueryTest($entityManager);
+        $doctrineORM = new TestDoctrineORMGetQuery($entityManager);
         $doctrineORM->setSource('AcmeDemoBundle:User');
         $query = $doctrineORM->getQuery();
 
@@ -126,7 +175,7 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $doctrineORM = new DoctrineORMGetQueryTest(null);
+        $doctrineORM = new TestDoctrineORMGetQuery(null);
         $doctrineORM->setSource($queryBuilder);
         $query = $doctrineORM->getQuery();
 

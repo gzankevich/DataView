@@ -68,11 +68,9 @@ class DoctrineORM implements AdapterInterface
 			$parameterName = "param_{$key}";
 
 			if(strpos($f->getColumnName(), '.') !== false) {
-
 				$relationPropertyPath = $this->joinRelations($alias.'.'.$f->getColumnName(), $queryBuilder);
-				$queryBuilder->andWhere("{$relationPropertyPath} {$f->getComparisonType()} :{$parameterName}");
-				echo '<br/>WHERE: '."{$relationPropertyPath} {$f->getComparisonType()} :{$parameterName} - PARAM=".$f->getCompareValue().'<br/>';
 
+				$queryBuilder->andWhere("{$relationPropertyPath} {$f->getComparisonType()} :{$parameterName}");
 			} else {
 				// build a where clause that looks something like:
 				// __anything__.name = :param_0
@@ -86,23 +84,19 @@ class DoctrineORM implements AdapterInterface
 		return $queryBuilder;
 	}
 
+	/**
+	 * Join any relations in the case that we are processing a property path which references one
+	 */
 	protected function joinRelations($propertyPath, $queryBuilder)
 	{
-		// getColumnName is referring to a property path since there is a '.' in it
-		// in other words, this is referencing an association
-
 		$columnNameParts = explode('.', $propertyPath);
 
-		var_dump($propertyPath);
-
-		var_dump(count($columnNameParts));
 		if(count($columnNameParts) > 2) {
 			if(!in_array("{$columnNameParts[0]}.{$columnNameParts[1]}", $this->joinsMade)) {
 				// join the association since we're going to be filtering on some column of it
 				$queryBuilder->join("{$columnNameParts[0]}.{$columnNameParts[1]}", $columnNameParts[1]);
 
 				$this->joinsMade[] = "{$columnNameParts[0]}.{$columnNameParts[1]}";
-				echo '<br/>JOIN: '."{$columnNameParts[0]}.{$columnNameParts[1]}";
 			}
 
 
@@ -110,13 +104,10 @@ class DoctrineORM implements AdapterInterface
 
 			$propertyPath = implode('.', $columnNameParts);
 
-
-
 			// recurse!
 			$propertyPath = $this->joinRelations($propertyPath, $queryBuilder);
-		} else {
-		}
-
+		}		
+		
 		return $propertyPath;
 	}
 
