@@ -8,6 +8,8 @@ The purpose of this library is to sort and filter ORM/ODM result sets with a min
 Usage
 ===========
 
+Note: This is currently incomplete.
+
 ```php
 // specify the adapter to use
 $dataview = new \DataView\DataView(new \DataView\Adapter\DoctrineORM($this->getEntityManager()));
@@ -39,6 +41,12 @@ $dataview->addFilter(new \DataView\Filter(
 	'Bob'
 ));
 
-// Pagerfanta pager
+// order by column
+$dataView->setOrderBy('name', \DataView\DataView::SORT_ORDER_DESCENDING);
+
+// order by a relation's column 
+$dataView->setOrderBy('company.name', \DataView\DataView::SORT_ORDER_DESCENDING);
+
+// the results are automatically put into Pagerfanta pager
 $pager = $dataview->getPager();
 ```
