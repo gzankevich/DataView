@@ -43,6 +43,15 @@ class DataView
     public function setSource($source)
     {
         $this->adapter->setSource($source);
+
+        return $this;
+    }
+
+    public function getSource()
+    {
+        return $this->source;
+
+        return $this;
     }
 
     /**
@@ -55,6 +64,8 @@ class DataView
     public function addFilter(Filter $filter)
     {
         $this->filters[] = $filter;
+
+        return $this;
     }
 
     /**
@@ -67,6 +78,13 @@ class DataView
     public function setFilters($filters)
     {
         $this->filters = $filters;
+
+        return $this;
+    }
+
+    public function getFilters()
+    {
+        return $this->filters;
     }
 
     /**
@@ -79,10 +97,12 @@ class DataView
     public function addColumn(Column $column)
     {
         $this->columns[] = $column;
+
+        return $this;
     }
 
     /**
-     * Assign a set of filters
+     * Set the columns to display
      *
      * @param array $columns The columns to set
      *
@@ -91,6 +111,18 @@ class DataView
     public function setColumns($columns)
     {
         $this->columns = $columns;
+
+        return $this;
+    }
+
+    /**
+     * Returns the configured columns
+     *
+     * @return array An array of Column instances
+     */
+    public function getColumns()
+    {
+        return $this->columns;
     }
 
     /**
@@ -105,6 +137,8 @@ class DataView
     {
         $this->orderByPropertyPath = $propertyPath;
         $this->sortOrder = $sortOrder;
+
+        return $this;
     }
 
 
@@ -124,4 +158,42 @@ class DataView
 
         return $this->adapter->getPager();
     }
+
+	/**
+     * Get the value for a given column from a record, resolving any relationships along the way
+     *
+     * If you have entity X which has a one-to-one with entity Y, which has an attribute 'name' then
+     * you can get the value of name by passing an instance of entity X and a property path of "Y.name"
+	 *
+	 * @param mixed $record The record to retrieve the value from
+	 * @param string $columnName The name of the column to fetch
+	 * @return mixed The value. This can be an array that looks like: array('value' => $value, 'url' => $url) if a link is to be displayed.
+	 * @author George Zankevich <george.zankevich.fof@gmail.com> 
+	 * @access public
+	 */
+	public function getEntityValueByPropertyPath($entity, $propertyPath)
+	{
+		if(strpos($propertyPath, '.') !== false) {
+			// resolve any relationships in the property path by iterating over them
+			$parts = explode('.', $propertyPath);
+			$getterName = 'get'.ucwords($parts[0]);
+			// remove the element of the property path we're processing
+			array_shift($parts);
+
+			// join the rest of the propery path into a string and recurse
+			$value = $this->getEntityValueByPropertyPath($entity->$getterName(), implode('.', $parts));
+		} else {
+            // no relationships left to resolve, the value will be in an attribute in $entity
+            // use the appropriate getter method to fetch it
+			$getterName = 'get'.ucwords($propertyPath);
+			$value = $entity->$getterName();
+		}
+
+		//if($value === true) $value = 'True';
+		//elseif($value === false) $value = 'False';
+
+		return $value;
+	}
+
+
 }
