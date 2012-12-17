@@ -11,8 +11,8 @@ use DataView\SourceNotSetException;
  */
 class DoctrineORM implements AdapterInterface
 {
-    protected $source, $tableName, $entityManager, $orderByPropertyPath, $sortOrder = null;
-    protected $filters, $joinsMade = array();
+    protected $source, $tableName, $entityManager, $orderByPropertyPath = null;
+    protected $columns, $filters, $joinsMade = array();
 
     public function __construct($entityManager)
     {
@@ -22,9 +22,14 @@ class DoctrineORM implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function getColumns($entity)
+    public function getColumns()
     {
+        return $this->columns;
+    }
 
+    public function setColumns($columns)
+    {
+        $this->columns = $columns;
     }
 
     /**
@@ -54,27 +59,46 @@ class DoctrineORM implements AdapterInterface
 			throw new InvalidSourceException('Invalid source of type '.is_object($this->source) ? get_class($this->source) : gettype($this->source).' cannot be processed by the DoctrineORM adapter');
 		}
 
+        // this is the main entity alias - we need to determine it in case one was specified in the initial querybuilder instance by the user, otherwise one will be created and named __entity__
 		$alias = $this->getAliasFromQueryBuilder($queryBuilder);
 
+        // we will need the joins to be in place for when we filter and sort
+        foreach($this->getColumns() as $column) {
+            $this->joinRelations($column->getPropertyPath(), $queryBuilder);
+        }
+
 		$queryBuilder = $this->applyFilters($queryBuilder, $alias);
-		$queryBuilder = $this->applyOrderBy($queryBuilder, $alias);
+        $queryBuilder = $this->applyOrderBy($queryBuilder, $alias);
+        $queryBuilder = $this->applyOrderBy($queryBuilder, $alias);
 
 		return $queryBuilder->getQuery();
 	}
 
-	protected function applyOrderBy($queryBuilder, $alias)
-	{
-		if(!$this->orderByPropertyPath && !$this->sortOrder) {
-			return $queryBuilder;
-		}
+    protected function applyOrderBy($queryBuilder, $alias)
+    {
+        foreach($this->columns as $column) {
+            if($column->getSortOrder()) {
+                $queryBuilder = $this->doApplyOrderBy($queryBuilder, $alias, $column->getPropertyPath(), $column->getSortOrder());
+            }
+        }
 
-		if(strpos($this->orderByPropertyPath, '.') !== false) {
+        return $queryBuilder;
+    }
+
+    protected function doApplyOrderBy($queryBuilder, $alias, $propertyPath, $sortOrder)
+    {
+        if(strpos($propertyPath, '.') === false) {
 			// we're referencing a relation, do not append the main entity's alias
-			$queryBuilder->add('orderBy', "{$this->orderByPropertyPath} {$this->sortOrder}");
+			$queryBuilder->add('orderBy', "{$alias}.{$propertyPath} {$sortOrder}");
 
 		} else {
-			$queryBuilder->add('orderBy', "{$alias}.{$this->orderByPropertyPath} {$this->sortOrder}");
+            // the orderByPropertyPath will contain a full property path from the main entity
+            // we just want the table alias (which will have been joined at this point) and the attribute to sort on
+            $parts = explode('.', $propertyPath);
+            $attribute = array_pop($parts);
+            $tableAlias = array_pop($parts);
 
+            $queryBuilder->add('orderBy', "{$tableAlias}.{$attribute} {$sortOrder}");
 		}
 
 		return $queryBuilder;
@@ -89,7 +113,7 @@ class DoctrineORM implements AdapterInterface
 			$parameterName = "param_{$key}";
 
 			if(strpos($f->getColumnName(), '.') !== false) {
-				$relationPropertyPath = $this->joinRelations($alias.'.'.$f->getColumnName(), $queryBuilder);
+				//$relationPropertyPath = $this->joinRelations($alias.'.'.$f->getColumnName(), $queryBuilder);
 
 				$queryBuilder->andWhere("{$relationPropertyPath} {$f->getComparisonType()} :{$parameterName}");
 			} else {
@@ -108,32 +132,43 @@ class DoctrineORM implements AdapterInterface
 	/**
 	 * Join any relations in the case that we are processing a property path which references one
 	 */
-	protected function joinRelations($propertyPath, $queryBuilder)
+	protected function joinRelations($propertyPath, $queryBuilder, $continue = false)
 	{
 		$columnNameParts = explode('.', $propertyPath);
 
+        $alias = $this->getAliasFromQueryBuilder($queryBuilder);
+
 		if(count($columnNameParts) > 2) {
-			if(!in_array("{$columnNameParts[0]}.{$columnNameParts[1]}", $this->joinsMade)) {
-				// join the association since we're going to be filtering on some column of it
-				$queryBuilder->join("{$columnNameParts[0]}.{$columnNameParts[1]}", $columnNameParts[1]);
+            // we are joining multiple relationships, don't use the alias as the first part of the join
+            if($continue) {
+                $queryBuilder->join("{$columnNameParts[0]}.{$columnNameParts[1]}", $columnNameParts[1]);
 
-				$this->joinsMade[] = "{$columnNameParts[0]}.{$columnNameParts[1]}";
-			}
-
-
-			unset($columnNameParts[0]);
+                if(count($columnNameParts == 3)) {
+                    // i.e. the propertyPath looks like  table.relation.attribute, meaning that there is no more work to do here
+                    return;
+                }
+            } else {
+                // we have not recursed in this method yet meaning that the relation we're joining is directly connected to the main entity, hence prefixing with the alias
+                $queryBuilder->join("{$alias}.{$columnNameParts[0]}", $columnNameParts[0]);
+            }
 
 			$propertyPath = implode('.', $columnNameParts);
 
-			// recurse!
-			$propertyPath = $this->joinRelations($propertyPath, $queryBuilder);
-		}		
+            // this is where we handle multiple levels of relations
+            $propertyPath = $this->joinRelations($propertyPath, $queryBuilder, true);
+        } elseif(count($columnNameParts) == 2) {
+            // e.g. the property path looks like   company.name, where company is a direct relation of the main entity
+            // so we need to prefix the main entity alias
+            $queryBuilder->join("{$alias}.{$columnNameParts[0]}", $columnNameParts[0]);
+        }    
 		
 		return $propertyPath;
 	}
 
 	/**
 	 * Extracts the primary entity alias from a QueryBuilder instance
+     *
+     * If the user provides a querybuilder instance as a starting point and sets an alias on the main entity then we need to extract it so that we can use it to join all of the relations.
 	 */
 	protected function getAliasFromQueryBuilder($queryBuilder)
 	{
@@ -173,14 +208,5 @@ class DoctrineORM implements AdapterInterface
 	public function getPager()
 	{
 		return new Pagerfanta(new DoctrineORMAdapter($this->getQuery()));
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function setOrderBy($propertyPath, $sortOrder)
-	{
-		$this->orderByPropertyPath = $propertyPath;
-		$this->sortOrder = $sortOrder;
 	}
 }

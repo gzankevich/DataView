@@ -10,6 +10,10 @@ namespace DataView;
  */
 class Column
 {
+    const SORT_ORDER_ASCENDING = 'ASC';
+    const SORT_ORDER_DESCENDING = 'DESC';
+    const SORT_ORDER_NONE = null;
+
 	/**
 	 * Maps the column to a field/relation on the entity/document
 	 *
@@ -42,6 +46,8 @@ class Column
      */
     private $label = null;
 
+    private $sortOrder = null;
+
 	/**
 	 * Constructor
 	 *
@@ -57,9 +63,14 @@ class Column
         // guess the label if none is specified
         $this->label = $label ? $label : ucwords(str_replace('.', ' ', $propertyPath));
         // default to using the property path for the displayed value
-		$this->displayPropertyPath = $displayPropertyPath ? $displayPropertyPath : $propertyPath;
+        $this->displayPropertyPath = $displayPropertyPath ? $displayPropertyPath : $this->propertyPathToDisplayPropertyPath($propertyPath);
 		$this->template = $template;
 	}
+
+    private function propertyPathToDisplayPropertyPath($propertyPath)
+    {
+        return str_replace(' ', '', ucwords(str_replace('_', ' ', $propertyPath)));
+    }
 
     public function setLabel($label)
     {
@@ -100,4 +111,27 @@ class Column
 	{
 		return $this->template;
 	}
+
+    public function setSortOrder($sortOrder)
+    {
+        $this->sortOrder = $sortOrder;
+    }
+
+    public function getSortOrder()
+    {
+        return $this->sortOrder;
+    }
+
+    public function getInverseSortOrder()
+    {
+        return $this->sortOrder === self::SORT_ORDER_DESCENDING ? self::SORT_ORDER_ASCENDING : self::SORT_ORDER_DESCENDING;
+    }
+
+    /**
+     * HTML elements don't like dots in their names, this replaces them with double underscores
+     */
+    public function getTemplateFriendlyPropertyPath()
+    {
+        return str_replace('.', '__', $this->getPropertyPath());
+    }
 }

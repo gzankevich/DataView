@@ -17,7 +17,6 @@ class DataView
     const SORT_ORDER_DESCENDING = 'DESC';
 
     private $orderByPropertyPath = null;
-    private $sortOrder = null;
     private $filters = array();
     private $columns = array();
 
@@ -125,23 +124,6 @@ class DataView
         return $this->columns;
     }
 
-    /**
-     * Set the order by column and the sort order
-     *
-     * @param string $propertyPath The property path of the column to order by
-     * @param string $sortOrder Ascending or descending
-     *
-     * @return null
-     */
-    public function setOrderBy($propertyPath, $sortOrder)
-    {
-        $this->orderByPropertyPath = $propertyPath;
-        $this->sortOrder = $sortOrder;
-
-        return $this;
-    }
-
-
 	/**
 	 * Gets the results from the adapter in a pager
 	 *
@@ -153,8 +135,8 @@ class DataView
 			throw new SourceNotSetException('Please set a source to fetch the results from');
 		}
 
+        $this->adapter->setColumns($this->columns);
         $this->adapter->setFilters($this->filters);
-        $this->adapter->setOrderBy($this->orderByPropertyPath, $this->sortOrder);
 
         return $this->adapter->getPager();
     }

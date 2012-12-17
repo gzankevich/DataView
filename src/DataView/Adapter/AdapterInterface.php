@@ -37,15 +37,6 @@ interface AdapterInterface
     public function setFilters($filters);
 
     /**
-     * Set the order by column and the sort order
-     *
-     * @param string $propertyPath The property path of the column to order by
-     * @param string $sortOrder Ascending or descending
-     * @return null
-     */
-    public function setOrderBy($propertyPath, $sortOrder);
-
-    /**
      * Get the pager.
      *
      * @return Pagerfanta
