@@ -32,12 +32,12 @@ class Column
 	private $displayPropertyPath = null;
 
 	/**
-	 * The template to use when rendering the cell contents for this column
+	 * The block to use when rendering the cell contents for this column
 	 *
 	 * Can be used to customize how, for example, many-to-many associations are presented (e.g. in an unordered list).
 	 * @var string
 	 */
-	private $template = null;
+	private $twigBlockName = null;
 
     /**
      * The label to display in the table heading for this column
@@ -54,17 +54,17 @@ class Column
 	 * @param string $propertyPath Maps the column to a field/relation on the entity/document - must map to a real DB column
      * @param string $label The label to display in the table heading for this column
 	 * @param string $displayPropertyPath Maps the property path to use for displaying the cell contents for this column - can be any getter on the entity/document
-	 * @param string $template The template to use when rendering cells in this column
+	 * @param string $twigBlockName The block to use when rendering cells in this column
 	 * @return null
 	 */
-	public function __construct($propertyPath, $label = null, $displayPropertyPath = null, $template = null) 
+	public function __construct($propertyPath, $label = null, $displayPropertyPath = null, $twigBlockName = null) 
 	{
 		$this->propertyPath = $propertyPath;
         // guess the label if none is specified
         $this->label = $label ? $label : ucwords(str_replace('.', ' ', $propertyPath));
         // default to using the property path for the displayed value
         $this->displayPropertyPath = $displayPropertyPath ? $displayPropertyPath : $this->propertyPathToDisplayPropertyPath($propertyPath);
-		$this->template = $template;
+		$this->twigBlockName = $twigBlockName;
 	}
 
     private function propertyPathToDisplayPropertyPath($propertyPath)
@@ -102,14 +102,14 @@ class Column
 		return $this->displayPropertyPath;
 	}
 
-	public function setTemplate($template)
+	public function setTwigBlockName($twigBlockName)
 	{
-		$this->template = $template;
+        $this->twigBlockName = $twigBlockName;
 	}
 
-	public function getTemplate($template)
+	public function getTwigBlockName()
 	{
-		return $this->template;
+		return $this->twigBlockName;
 	}
 
     public function setSortOrder($sortOrder)
