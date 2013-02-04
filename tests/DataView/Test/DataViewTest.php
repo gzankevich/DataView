@@ -11,7 +11,7 @@ class DataViewTest extends \PHPUnit_Framework_TestCase
     /**
      * @var DataView
      */
-    protected $object;
+    protected $dataView;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -21,7 +21,7 @@ class DataViewTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->adapter = $this->getMock('DataView\Adapter\AdapterInterface');
-        $this->object = new DataView($this->adapter);
+        $this->dataView = new DataView($this->adapter);
     }
 
     /**
@@ -32,7 +32,7 @@ class DataViewTest extends \PHPUnit_Framework_TestCase
         $source = 'Entity\Source';
         $this->adapter->expects($this->once())->method('setSource')->with($this->equalTo($source));
 
-        $this->object->setSource($source);
+        $this->dataView->setSource($source);
     }
 
     /**
@@ -40,15 +40,12 @@ class DataViewTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetPager()
     {
-        $property = 'column';
-        $sortOder = 'ASC';
-        $this->object->setOrderBy($property, $sortOder);
-
         $this->adapter->expects($this->once())->method('getSource')->will($this->returnValue('source'));
         $this->adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
-        $this->adapter->expects($this->once())->method('setOrderBy')->with($this->equalTo($property), $this->equalTo($sortOder));
+        $this->adapter->expects($this->once())->method('setColumns')->with($this->equalTo(array()));
+        $this->adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
         $this->adapter->expects($this->once())->method('getPager');
 
-        $this->object->getPager();
+        $this->dataView->getPager();
     }
 }

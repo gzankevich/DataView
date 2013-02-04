@@ -1,6 +1,7 @@
 <?php
 namespace DataView\Test\Adapter;
 
+use DataView\Column;
 use DataView\Filter;
 use DataView\DataView;
 use DataView\Adapter\DoctrineORM;
@@ -36,6 +37,11 @@ class TestDoctrineORMJoinRelations extends DoctrineORM
 	public function joinRelations($propertyPath, $queryBuilder)
     {
         return parent::joinRelations($propertyPath, $queryBuilder);
+    }
+
+	protected function getAliasFromQueryBuilder($queryBuilder)
+    {
+        return 'foo';
     }
 }
 
@@ -75,10 +81,10 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
         $queryBuilder
             ->expects($this->once())
             ->method('join')
-            ->with($this->equalTo('foo.bar'));
+            ->with($this->equalTo('foo.test'));
 
         $doctrineORM = new TestDoctrineORMJoinRelations(null, null, null);
-        $doctrineORM->joinRelations('foo.bar.baz', $queryBuilder);
+        $doctrineORM->joinRelations('test.bar', $queryBuilder);
     }
 
     /**
@@ -220,8 +226,19 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with($this->equalTo('orderBy'), $this->equalTo('x.foo DESC'));
 
+        $column = $this->getMockBuilder('\DataView\Column')->disableOriginalConstructor()->getMock();
+        $column
+            ->expects($this->once())
+            ->method('getPropertyPath')
+            ->will($this->returnValue('foo'));
+        $column
+            ->expects($this->exactly(2))
+            ->method('getSortOrder')
+            ->will($this->returnValue(Column::SORT_ORDER_DESCENDING));
+
         $doctrineORM = new TestDoctrineORMApplyOrderBy(null);
-        $doctrineORM->setOrderBy('foo', DataView::SORT_ORDER_DESCENDING);
+        $doctrineORM->setColumns(array($column));
+
         $doctrineORM->applyOrderBy($queryBuilder, 'x');
     }
 
@@ -238,8 +255,19 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
             ->method('add')
             ->with($this->equalTo('orderBy'), $this->equalTo('foo.bar DESC'));
 
+        $column = $this->getMockBuilder('\DataView\Column')->disableOriginalConstructor()->getMock();
+        $column
+            ->expects($this->once())
+            ->method('getPropertyPath')
+            ->will($this->returnValue('foo.bar'));
+        $column
+            ->expects($this->exactly(2))
+            ->method('getSortOrder')
+            ->will($this->returnValue(Column::SORT_ORDER_DESCENDING));
+
         $doctrineORM = new TestDoctrineORMApplyOrderBy(null);
-        $doctrineORM->setOrderBy('foo.bar', DataView::SORT_ORDER_DESCENDING);
+        $doctrineORM->setColumns(array($column));
+
         $doctrineORM->applyOrderBy($queryBuilder, 'x');
     }
 }

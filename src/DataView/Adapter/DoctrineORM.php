@@ -12,7 +12,9 @@ use DataView\SourceNotSetException;
 class DoctrineORM implements AdapterInterface
 {
     protected $source, $tableName, $entityManager, $orderByPropertyPath = null;
-    protected $columns, $filters, $joinsMade = array();
+    protected $columns = array();
+    protected $filters = array();
+    protected $joinsMade = array();
 
     public function __construct($entityManager)
     {
@@ -69,7 +71,6 @@ class DoctrineORM implements AdapterInterface
 
 		$queryBuilder = $this->applyFilters($queryBuilder, $alias);
         $queryBuilder = $this->applyOrderBy($queryBuilder, $alias);
-        $queryBuilder = $this->applyOrderBy($queryBuilder, $alias);
 
 		return $queryBuilder->getQuery();
 	}
@@ -114,6 +115,10 @@ class DoctrineORM implements AdapterInterface
 
 			if(strpos($f->getColumnName(), '.') !== false) {
 				//$relationPropertyPath = $this->joinRelations($alias.'.'.$f->getColumnName(), $queryBuilder);
+
+                $parts = explode('.', $f->getColumnName());
+
+                $relationPropertyPath = $parts[count($parts) - 2].'.'.$parts[count($parts) - 1];
 
 				$queryBuilder->andWhere("{$relationPropertyPath} {$f->getComparisonType()} :{$parameterName}");
 			} else {

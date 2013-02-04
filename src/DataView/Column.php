@@ -57,14 +57,16 @@ class Column
 	 * @param string $twigBlockName The block to use when rendering cells in this column
 	 * @return null
 	 */
-	public function __construct($propertyPath, $label = null, $displayPropertyPath = null, $twigBlockName = null) 
+    public function __construct($propertyPath, $label = null, $displayPropertyPath = null, $twigBlockName = null, $isSortable = true) 
 	{
 		$this->propertyPath = $propertyPath;
+
         // guess the label if none is specified
         $this->label = $label ? $label : ucwords(str_replace('.', ' ', $propertyPath));
         // default to using the property path for the displayed value
         $this->displayPropertyPath = $displayPropertyPath ? $displayPropertyPath : $this->propertyPathToDisplayPropertyPath($propertyPath);
 		$this->twigBlockName = $twigBlockName;
+        $this->isSortable = $isSortable;
 	}
 
     private function propertyPathToDisplayPropertyPath($propertyPath)
@@ -133,5 +135,10 @@ class Column
     public function getTemplateFriendlyPropertyPath()
     {
         return str_replace('.', '__', $this->getPropertyPath());
+    }
+
+    public function isSortable()
+    {
+        return $this->isSortable;
     }
 }

@@ -28,6 +28,9 @@ interface AdapterInterface
      */
     public function getSource();
 
+    public function getColumns();
+    public function setColumns($columns);
+
     /**
      * Set the filters to apply
      *
