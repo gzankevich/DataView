@@ -18,7 +18,7 @@ class Filter
 
 	private $columnName, $comparisonType, $compareValue;
 
-	public function __construct($columnName, $comparisonType, $compareValue)
+    public function __construct($columnName = null, $comparisonType = null, $compareValue = null)
 	{
 		$this->columnName = $columnName;
 		$this->comparisonType = $comparisonType;

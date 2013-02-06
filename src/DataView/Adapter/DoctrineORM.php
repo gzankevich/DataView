@@ -146,7 +146,7 @@ class DoctrineORM implements AdapterInterface
 		if(count($columnNameParts) > 2) {
             // we are joining multiple relationships, don't use the alias as the first part of the join
             if($continue) {
-                $queryBuilder->join("{$columnNameParts[0]}.{$columnNameParts[1]}", $columnNameParts[1]);
+                $queryBuilder->leftJoin("{$columnNameParts[0]}.{$columnNameParts[1]}", $columnNameParts[1]);
 
                 if(count($columnNameParts == 3)) {
                     // i.e. the propertyPath looks like  table.relation.attribute, meaning that there is no more work to do here
@@ -164,7 +164,7 @@ class DoctrineORM implements AdapterInterface
         } elseif(count($columnNameParts) == 2) {
             // e.g. the property path looks like   company.name, where company is a direct relation of the main entity
             // so we need to prefix the main entity alias
-            $queryBuilder->join("{$alias}.{$columnNameParts[0]}", $columnNameParts[0]);
+            $queryBuilder->leftJoin("{$alias}.{$columnNameParts[0]}", $columnNameParts[0]);
         }    
 		
 		return $propertyPath;

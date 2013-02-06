@@ -67,6 +67,15 @@ class DataView
         return $this;
     }
 
+    public function removeFilter(Filter $filter)
+    {
+        foreach($this->filters as $key => $f) {
+            if($f == $filter) {
+                unset($this->filters[$key]);
+            }
+        }
+    }
+
     /**
      * Assign a set of filters
      *
@@ -155,6 +164,9 @@ class DataView
 	 */
 	public function getEntityValueByPropertyPath($entity, $propertyPath)
 	{
+        // this happens when a relation is not set (i.e. an office has no company assigned to it)
+        if(empty($entity)) return;
+
 		if(strpos($propertyPath, '.') !== false) {
 			// resolve any relationships in the property path by iterating over them
 			$parts = explode('.', $propertyPath);

@@ -80,7 +80,7 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
 
         $queryBuilder
             ->expects($this->once())
-            ->method('join')
+            ->method('leftJoin')
             ->with($this->equalTo('foo.test'));
 
         $doctrineORM = new TestDoctrineORMJoinRelations(null, null, null);
