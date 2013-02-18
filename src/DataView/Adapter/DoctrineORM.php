@@ -11,7 +11,7 @@ use DataView\SourceNotSetException;
  */
 class DoctrineORM implements AdapterInterface
 {
-    protected $source, $tableName, $entityManager, $orderByPropertyPath = null;
+    protected $source, $tableName, $entityManager, $orderByPropertyPath, $pager = null;
     protected $columns = array();
     protected $filters = array();
     protected $joinsMade = array();
@@ -66,6 +66,11 @@ class DoctrineORM implements AdapterInterface
 
         // we will need the joins to be in place for when we filter and sort
         foreach($this->getColumns() as $column) {
+            // allow for non-mapped columns
+            if(!$column->getPropertyPath()) {
+                continue;
+            }
+
             $this->joinRelations($column->getPropertyPath(), $queryBuilder);
         }
 
@@ -212,6 +217,10 @@ class DoctrineORM implements AdapterInterface
 	 */
 	public function getPager()
 	{
-		return new Pagerfanta(new DoctrineORMAdapter($this->getQuery()));
+        if(!$this->pager) {
+		    $this->pager = new Pagerfanta(new DoctrineORMAdapter($this->getQuery()));
+        }
+
+        return $this->pager;
 	}
 }

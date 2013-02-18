@@ -51,7 +51,7 @@ class Column
 	/**
 	 * Constructor
 	 *
-	 * @param string $propertyPath Maps the column to a field/relation on the entity/document - must map to a real DB column
+	 * @param string $propertyPath Maps the column to a field/relation on the entity/document - can be null for non-mapped columns
      * @param string $label The label to display in the table heading for this column
 	 * @param string $displayPropertyPath Maps the property path to use for displaying the cell contents for this column - can be any getter on the entity/document
 	 * @param string $twigBlockName The block to use when rendering cells in this column
@@ -60,13 +60,13 @@ class Column
     public function __construct($propertyPath, $label = null, $displayPropertyPath = null, $twigBlockName = null, $isSortable = true) 
 	{
 		$this->propertyPath = $propertyPath;
-
         // guess the label if none is specified
         $this->label = $label ? $label : ucwords(str_replace('.', ' ', $propertyPath));
         // default to using the property path for the displayed value
         $this->displayPropertyPath = $displayPropertyPath ? $displayPropertyPath : $this->propertyPathToDisplayPropertyPath($propertyPath);
 		$this->twigBlockName = $twigBlockName;
-        $this->isSortable = $isSortable;
+        // columns with no property path are not sortable
+        $this->isSortable = !$propertyPath ? false : $isSortable;
 	}
 
     private function propertyPathToDisplayPropertyPath($propertyPath)
@@ -131,6 +131,8 @@ class Column
 
     /**
      * HTML elements don't like dots in their names, this replaces them with double underscores
+     *
+     * @return string
      */
     public function getTemplateFriendlyPropertyPath()
     {

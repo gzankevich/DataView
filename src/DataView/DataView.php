@@ -164,8 +164,9 @@ class DataView
 	 */
 	public function getEntityValueByPropertyPath($entity, $propertyPath)
 	{
-        // this happens when a relation is not set (i.e. an office has no company assigned to it)
-        if(empty($entity)) return;
+        // entity is null when a relation is not set (i.e. an office has no company assigned to it)
+        // property path is null for non-mapped columns
+        if(!$entity || !$propertyPath) return;
 
 		if(strpos($propertyPath, '.') !== false) {
 			// resolve any relationships in the property path by iterating over them
