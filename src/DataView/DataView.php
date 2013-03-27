@@ -18,7 +18,8 @@ class DataView
 
     private $orderByPropertyPath = null;
     private $filters = array();
-    private $columns = array();
+    public $columns = array();
+    private $currentPage = 1;
 
     /**
      * Constructor
@@ -30,6 +31,16 @@ class DataView
     public function __construct(AdapterInterface $adapter)
     {
         $this->adapter = $adapter;
+    }
+
+    public function getCurrentPage()
+    {
+        return $this->currentPage;
+    }
+
+    public function setCurrentPage($page)
+    {
+        $this->currentPage = $page;
     }
 
     /**
@@ -147,7 +158,10 @@ class DataView
         $this->adapter->setColumns($this->columns);
         $this->adapter->setFilters($this->filters);
 
-        return $this->adapter->getPager();
+        $pager = $this->adapter->getPager();
+        $pager->setCurrentPage($this->getCurrentPage());
+
+        return $pager;
     }
 
 	/**
