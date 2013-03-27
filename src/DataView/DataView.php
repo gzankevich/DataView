@@ -18,7 +18,7 @@ class DataView
 
     private $orderByPropertyPath = null;
     private $filters = array();
-    public $columns = array();
+    private $columns = array();
     private $currentPage = 1;
 
     /**
