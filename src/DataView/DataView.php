@@ -75,6 +75,13 @@ class DataView
         return $this;
     }
 
+    /**
+     * Remove a filter
+     *
+     * @param Filter $filter The filter to remove
+     *
+     * @return null
+     */
     public function removeFilter(Filter $filter)
     {
         foreach($this->filters as $key => $f) {
@@ -98,6 +105,11 @@ class DataView
         return $this;
     }
 
+    /**
+     * Get the filters to apply
+     *
+     * @return array An array of Filter instances
+     */
     public function getFilters()
     {
         return $this->filters;
@@ -197,5 +209,19 @@ class DataView
 		return $value;
 	}
 
-
+    /**
+     * Apply sorting to a column
+     *
+     * @param string $propertyPath The property path of the column to apply the sorting to
+     * @param string $order The order to sort in (Column::SORT_ORDER_ASCENDING or Column::SORT_ORDER_DESCENDING)
+     * @return null
+     */
+    protected function applySort($dataView, $propertyPath, $order)
+    {
+        foreach($dataView->getColumns() as $column) {
+            if($column->getPropertyPath() === $propertyPath) {
+                $column->setSortOrder($order);
+            }
+        }
+    }
 }

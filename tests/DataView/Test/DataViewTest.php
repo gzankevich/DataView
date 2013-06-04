@@ -6,7 +6,7 @@ use DataView\DataView;
 /**
  * @author Martin Parsiegla <parsiegla@kuponjo.de>
  */
-class DataViewTest extends \PHPUnit_Framework_TestCase
+class DataViewTest extends BaseUnitTest
 {
     /**
      * @var DataView
