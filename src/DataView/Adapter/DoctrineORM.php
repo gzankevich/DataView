@@ -4,7 +4,8 @@ namespace DataView\Adapter;
 
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
-use DataView\SourceNotSetException;
+use DataView\Adapter\SourceNotSetException;
+use DataView\Adapter\InvalidSourceException;
 
 /**
  * Doctrine ORM adapter
@@ -43,7 +44,7 @@ class DoctrineORM implements AdapterInterface
      */
 	protected function getQuery()
 	{
-		if(!$this->source) {
+		if($this->source === null) {
 			throw new SourceNotSetException('Please set a source to fetch the results from');
 		}
 
@@ -58,7 +59,7 @@ class DoctrineORM implements AdapterInterface
 			// source is a QueryBuilder
 			$queryBuilder = $this->source;
 		} else {
-			throw new InvalidSourceException('Invalid source of type '.is_object($this->source) ? get_class($this->source) : gettype($this->source).' cannot be processed by the DoctrineORM adapter');
+			throw new InvalidSourceException('Invalid source of type '.gettype($this->source).' cannot be processed by the DoctrineORM adapter');
 		}
 
         // this is the main entity alias - we need to determine it in case one was specified in the initial querybuilder instance by the user, otherwise one will be created and named __entity__

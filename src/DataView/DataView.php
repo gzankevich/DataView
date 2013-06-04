@@ -148,10 +148,6 @@ class DataView
 	 */
 	public function getPager()
 	{
-		if(!$this->adapter->getSource()) {
-			throw new SourceNotSetException('Please set a source to fetch the results from');
-		}
-
         $this->adapter->setColumns($this->columns);
         $this->adapter->setFilters($this->filters);
 

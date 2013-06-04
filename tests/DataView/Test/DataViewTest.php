@@ -43,22 +43,10 @@ class DataViewTest extends \PHPUnit_Framework_TestCase
         $pager = $this->getMockBuilder('Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
         $pager->expects($this->once())->method('setCurrentPage')->with($this->equalTo(1));
 
-        $this->adapter->expects($this->once())->method('getSource')->will($this->returnValue('source'));
         $this->adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
         $this->adapter->expects($this->once())->method('setColumns')->with($this->equalTo(array()));
         $this->adapter->expects($this->once())->method('getPager')->will($this->returnValue($pager));
 
-        $this->dataView->getPager();
-    }
-
-    /**
-     * @covers DataView\DataView::getPager
-     */
-    public function testGetPager_noSource()
-    {
-        $this->adapter->expects($this->once())->method('getSource')->will($this->returnValue(null));
-
-        $this->setExpectedException('DataView\SourceNotSetException');
         $this->dataView->getPager();
     }
 

@@ -148,9 +148,18 @@ class DoctrineORMTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetQuery_noSource()
     {
-        $this->setExpectedException('DataView\SourceNotSetException');
+        $this->setExpectedException('DataView\Adapter\SourceNotSetException');
         $doctrineORM = new TestDoctrineORMGetQuery(null);
         $doctrineORM->getQuery();
+    }
+
+    public function testGetQuery_invalidSource()
+    {
+        $doctrineORM = new TestDoctrineORMGetQuery(null);
+        $doctrineORM->setSource(array());
+
+        $this->setExpectedException('DataView\Adapter\InvalidSourceException');
+        $query = $doctrineORM->getQuery();
     }
 
     /**
