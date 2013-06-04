@@ -40,12 +40,83 @@ class DataViewTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetPager()
     {
+        $pager = $this->getMockBuilder('Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
+        $pager->expects($this->once())->method('setCurrentPage')->with($this->equalTo(1));
+
         $this->adapter->expects($this->once())->method('getSource')->will($this->returnValue('source'));
         $this->adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
         $this->adapter->expects($this->once())->method('setColumns')->with($this->equalTo(array()));
-        $this->adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
-        $this->adapter->expects($this->once())->method('getPager');
+        $this->adapter->expects($this->once())->method('getPager')->will($this->returnValue($pager));
 
         $this->dataView->getPager();
+    }
+
+    /**
+     * @covers DataView\DataView::getPager
+     */
+    public function testGetPager_noSource()
+    {
+        $this->adapter->expects($this->once())->method('getSource')->will($this->returnValue(null));
+
+        $this->setExpectedException('DataView\SourceNotSetException');
+        $this->dataView->getPager();
+    }
+
+    /**
+     * @covers DataView\DataView::getEntityValueByPropertyPath
+     */
+    public function testGetEntityValueByPropertyPath_noEntity()
+    {
+        $this->assertEquals(null, $this->dataView->getEntityValueByPropertyPath(null, 'foo'));
+    }
+
+    /**
+     * @covers DataView\DataView::getEntityValueByPropertyPath
+     */
+    public function testGetEntityValueByPropertyPath_noPropertyPath()
+    {
+        $this->assertEquals(null, $this->dataView->getEntityValueByPropertyPath('foo', null));
+    }
+
+    /**
+     * @covers DataView\DataView::getEntityValueByPropertyPath
+     */
+    public function testGetEntityValueByPropertyPath_simpleProperty()
+    {
+        $entity = $this->getMock('stdClass', array('getFoo'));
+        $entity->expects($this->once())->method('getFoo')->will($this->returnValue('bar'));
+
+        $this->assertEquals('bar', $this->dataView->getEntityValueByPropertyPath($entity, 'foo'));
+    }
+
+    /**
+     * @covers DataView\DataView::getEntityValueByPropertyPath
+     */
+    public function testGetEntityValueByPropertyPath_associationOneLevel()
+    {
+        $associatedEntity = $this->getMock('stdClass', array('getFoo'));
+        $associatedEntity->expects($this->once())->method('getFoo')->will($this->returnValue('bar'));
+
+        $entity = $this->getMock('stdClass', array('getAssociatedEntity'));
+        $entity->expects($this->once())->method('getAssociatedEntity')->will($this->returnValue($associatedEntity));
+
+        $this->assertEquals('bar', $this->dataView->getEntityValueByPropertyPath($entity, 'associatedEntity.foo'));
+    }
+
+    /**
+     * @covers DataView\DataView::getEntityValueByPropertyPath
+     */
+    public function testGetEntityValueByPropertyPath_associationTwoLevels()
+    {
+        $associatedEntity2 = $this->getMock('stdClass', array('getFoo'));
+        $associatedEntity2->expects($this->once())->method('getFoo')->will($this->returnValue('bar'));
+
+        $associatedEntity = $this->getMock('stdClass', array('getAssociatedEntity2'));
+        $associatedEntity->expects($this->once())->method('getAssociatedEntity2')->will($this->returnValue($associatedEntity2));
+
+        $entity = $this->getMock('stdClass', array('getAssociatedEntity'));
+        $entity->expects($this->once())->method('getAssociatedEntity')->will($this->returnValue($associatedEntity));
+
+        $this->assertEquals('bar', $this->dataView->getEntityValueByPropertyPath($entity, 'associatedEntity.associatedEntity2.foo'));
     }
 }
