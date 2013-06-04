@@ -13,9 +13,6 @@ use Pagerfanta\Pagerfanta;
  */
 class DataView
 {
-    const SORT_ORDER_ASCENDING = 'ASC';
-    const SORT_ORDER_DESCENDING = 'DESC';
-
     private $orderByPropertyPath = null;
     private $filters = array();
     private $columns = array();

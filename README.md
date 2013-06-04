@@ -42,10 +42,10 @@ $dataview->addFilter(new \DataView\Filter(
 ));
 
 // order by column
-$dataView->setOrderBy('name', \DataView\DataView::SORT_ORDER_DESCENDING);
+$dataView->setOrderBy('name', \DataView\Column::SORT_ORDER_DESCENDING);
 
 // order by a relation's column 
-$dataView->setOrderBy('company.name', \DataView\DataView::SORT_ORDER_DESCENDING);
+$dataView->setOrderBy('company.name', \DataView\Column::SORT_ORDER_DESCENDING);
 
 // the results are automatically put into Pagerfanta pager
 $pager = $dataview->getPager();
