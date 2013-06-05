@@ -30,16 +30,6 @@ class DataView
         $this->adapter = $adapter;
     }
 
-    public function getCurrentPage()
-    {
-        return $this->currentPage;
-    }
-
-    public function setCurrentPage($page)
-    {
-        $this->currentPage = $page;
-    }
-
     /**
      * Can be a query builder, entity name, array (depends on what the adapter supports)
      *
@@ -164,7 +154,6 @@ class DataView
         $this->adapter->setFilters($this->filters);
 
         $pager = $this->adapter->getPager();
-        $pager->setCurrentPage($this->getCurrentPage());
 
         return $pager;
     }
@@ -216,9 +205,9 @@ class DataView
      * @param string $order The order to sort in (Column::SORT_ORDER_ASCENDING or Column::SORT_ORDER_DESCENDING)
      * @return null
      */
-    protected function applySort($dataView, $propertyPath, $order)
+    public function applySortOrder($propertyPath, $order)
     {
-        foreach($dataView->getColumns() as $column) {
+        foreach($this->getColumns() as $column) {
             if($column->getPropertyPath() === $propertyPath) {
                 $column->setSortOrder($order);
             }

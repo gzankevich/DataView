@@ -41,7 +41,6 @@ class DataViewTest extends BaseUnitTest
     public function testGetPager()
     {
         $pager = $this->getMockBuilder('Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
-        $pager->expects($this->once())->method('setCurrentPage')->with($this->equalTo(1));
 
         $this->adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
         $this->adapter->expects($this->once())->method('setColumns')->with($this->equalTo(array()));
