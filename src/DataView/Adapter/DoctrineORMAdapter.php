@@ -10,29 +10,14 @@ use DataView\Adapter\InvalidSourceException;
 /**
  * Doctrine ORM adapter
  */
-class DoctrineORMAdapter implements AdapterInterface
+class DoctrineORMAdapter extends BaseAdapter
 {
-    protected $source, $tableName, $entityManager, $orderByPropertyPath, $pager = null;
-    protected $columns = array();
-    protected $filters = array();
+    protected $tableName, $entityManager, $orderByPropertyPath, $pager = null;
     protected $joinsMade = array();
 
     public function __construct($entityManager)
     {
         $this->entityManager = $entityManager;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getColumns()
-    {
-        return $this->columns;
-    }
-
-    public function setColumns($columns)
-    {
-        $this->columns = $columns;
     }
 
     /**
@@ -192,36 +177,8 @@ class DoctrineORMAdapter implements AdapterInterface
 	/**
 	 * {@inheritdoc}
 	 */
-	public function setSource($source)
-	{
-		$this->source = $source;
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getSource()
-	{
-		return $this->source;
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function setFilters($filters)
-	{
-		$this->filters = $filters;
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getPager()
-	{
-        if(!$this->pager) {
-		    $this->pager = new Pagerfanta(new PagerfantaDoctrineORMAdapter($this->getQuery()));
-        }
-
-        return $this->pager;
-	}
+    protected function createPager()
+    {
+        return new Pagerfanta(new PagerfantaDoctrineORMAdapter($this->getQuery()));
+    }
 }

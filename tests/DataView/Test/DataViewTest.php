@@ -1,10 +1,12 @@
 <?php
+
 namespace DataView\Test;
 
 use DataView\DataView;
 
 /**
  * @author Martin Parsiegla <parsiegla@kuponjo.de>
+ * @author George Zankevich <gzankevich@gmail.com>
  */
 class DataViewTest extends BaseUnitTest
 {
@@ -20,7 +22,7 @@ class DataViewTest extends BaseUnitTest
 
     protected function setUp()
     {
-        $this->adapter = $this->getMock('DataView\Adapter\AdapterInterface');
+        $this->adapter = $this->getMockForAbstractClass('\DataView\Adapter\BaseAdapter');
         $this->dataView = new DataView($this->adapter);
     }
 
@@ -30,9 +32,13 @@ class DataViewTest extends BaseUnitTest
     public function testSetSource()
     {
         $source = 'Entity\Source';
-        $this->adapter->expects($this->once())->method('setSource')->with($this->equalTo($source));
 
-        $this->dataView->setSource($source);
+        $adapter = $this->getMockForAbstractClass('\DataView\Adapter\BaseAdapter', array(), '', false, true, true, array('setSource'));
+        $adapter->expects($this->once())->method('setSource')->with($this->equalTo($source));
+
+        $dataView = new DataView($adapter);
+
+        $dataView->setSource($source);
     }
 
     /**
@@ -40,7 +46,7 @@ class DataViewTest extends BaseUnitTest
      */
     public function testGetPager_noColumns()
     {
-        $pager = $this->getMockBuilder('Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
+        $pager = $this->getMockBuilder('\Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
 
         $this->setExpectedException('\DataView\NoColumnsAddedException');
         $this->dataView->getPager();
@@ -51,16 +57,18 @@ class DataViewTest extends BaseUnitTest
      */
     public function testGetPager_valid()
     {
-        $pager = $this->getMockBuilder('Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
-
         $column = $this->getMockBuilder('\DataView\Column')->disableOriginalConstructor()->getMock();
 
-        $this->adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
-        $this->adapter->expects($this->once())->method('setColumns')->with($this->equalTo(array($column)));
-        $this->adapter->expects($this->once())->method('getPager')->will($this->returnValue($pager));
+        $pager = $this->getMockBuilder('\Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
 
-        $this->dataView->addColumn($column);
-        $this->dataView->getPager();
+        $adapter = $this->getMockForAbstractClass('\DataView\Adapter\BaseAdapter', array(), '', false, true, true, array('setFilters', 'setColumns', 'getPager'));
+        $adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
+        $adapter->expects($this->once())->method('setColumns')->with($this->equalTo(array($column)));
+        $adapter->expects($this->once())->method('getPager')->will($this->returnValue($pager));
+
+        $dataView = new DataView($adapter);
+        $dataView->addColumn($column);
+        $dataView->getPager();
     }
 
     /**

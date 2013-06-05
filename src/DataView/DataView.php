@@ -2,7 +2,7 @@
 
 namespace DataView;
 
-use DataView\Adapter\AdapterInterface;
+use DataView\Adapter\BaseAdapter;
 use Pagerfanta\Pagerfanta;
 
 /**
@@ -23,9 +23,9 @@ class DataView
      *
      * The ORM/ODM adapter is injected here.
      *
-     * @param AdapterInterface $adapter The adapter to use (e.g. DoctrineORM)
+     * @param BaseAdapter $adapter The adapter to use (e.g. DoctrineORM)
      */
-    public function __construct(AdapterInterface $adapter)
+    public function __construct(BaseAdapter $adapter)
     {
         $this->adapter = $adapter;
     }
