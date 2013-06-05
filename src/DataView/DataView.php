@@ -150,8 +150,15 @@ class DataView
 	 */
 	public function getPager()
 	{
-        $this->adapter->setColumns($this->columns);
-        $this->adapter->setFilters($this->filters);
+        $columns = $this->getColumns();
+
+        if(empty($columns)) {
+            // it makes no sense to get the pager when there are no columns to display
+            throw new NoColumnsAddedException();
+        }
+
+        $this->adapter->setColumns($columns);
+        $this->adapter->setFilters($this->getFilters());
 
         $pager = $this->adapter->getPager();
 

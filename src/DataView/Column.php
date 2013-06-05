@@ -116,6 +116,11 @@ class Column
 
     public function setSortOrder($sortOrder)
     {
+        if($sortOrder !== self::SORT_ORDER_ASCENDING && $sortOrder !== self::SORT_ORDER_ASCENDING) {
+            throw new InvalidSortOrderException();
+        }
+
+
         $this->sortOrder = $sortOrder;
     }
 
