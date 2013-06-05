@@ -2,7 +2,7 @@
 
 namespace DataView\Adapter;
 
-use Pagerfanta\Adapter\ArrayAdapter as ArrayAdapter;
+use Pagerfanta\Adapter\ArrayAdapter as PagerfantaArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use DataView\Adapter\SourceNotSetException;
 use DataView\Adapter\InvalidSourceException;
@@ -10,9 +10,9 @@ use DataView\Adapter\InvalidSourceException;
 /**
  * Array adapter
  */
-class ArrayAdapter implements BaseAdapter
+class ArrayAdapter extends BaseAdapter
 {
-    public abstract function getPager()
+    public function createPager()
     {
         return new Pagerfanta(new PagerfantaArrayAdapter($this->getSource()));
     }
