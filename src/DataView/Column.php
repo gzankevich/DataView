@@ -10,8 +10,9 @@ namespace DataView;
  */
 class Column
 {
-    const SORT_ORDER_ASCENDING = 'ASC';
+    const SORT_ORDER_ASCENDING  = 'ASC';
     const SORT_ORDER_DESCENDING = 'DESC';
+    const SORT_ORDER_NONE       = null;
 
 	/**
 	 * Maps the column to a field/relation on the entity/document
@@ -115,7 +116,9 @@ class Column
 
     public function setSortOrder($sortOrder)
     {
-        if($sortOrder !== self::SORT_ORDER_ASCENDING && $sortOrder !== self::SORT_ORDER_ASCENDING) {
+        if( $sortOrder !== self::SORT_ORDER_DESCENDING &&
+            $sortOrder !== self::SORT_ORDER_ASCENDING &&
+            $sortOrder !== self::SORT_ORDER_NONE) {
             throw new InvalidSortOrderException();
         }
 
