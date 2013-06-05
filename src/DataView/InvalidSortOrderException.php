@@ -1,6 +1,6 @@
 <?php
 
-namespace DataView\Adapter;
+namespace DataView;
 
 class InvalidSortOrderException extends \Exception
 {

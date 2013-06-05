@@ -38,14 +38,28 @@ class DataViewTest extends BaseUnitTest
     /**
      * @covers DataView\DataView::getPager
      */
-    public function testGetPager()
+    public function testGetPager_noColumns()
     {
         $pager = $this->getMockBuilder('Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
 
+        $this->setExpectedException('\DataView\NoColumnsAddedException');
+        $this->dataView->getPager();
+    }
+
+    /**
+     * @covers DataView\DataView::getPager
+     */
+    public function testGetPager_valid()
+    {
+        $pager = $this->getMockBuilder('Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
+
+        $column = $this->getMockBuilder('\DataView\Column')->disableOriginalConstructor()->getMock();
+
         $this->adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
-        $this->adapter->expects($this->once())->method('setColumns')->with($this->equalTo(array()));
+        $this->adapter->expects($this->once())->method('setColumns')->with($this->equalTo(array($column)));
         $this->adapter->expects($this->once())->method('getPager')->will($this->returnValue($pager));
 
+        $this->dataView->addColumn($column);
         $this->dataView->getPager();
     }
 

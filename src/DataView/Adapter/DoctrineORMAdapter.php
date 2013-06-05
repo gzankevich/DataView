@@ -2,7 +2,7 @@
 
 namespace DataView\Adapter;
 
-use Pagerfanta\Adapter\DoctrineORMAdapter;
+use Pagerfanta\Adapter\DoctrineORMAdapter as PagerfantaDoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
 use DataView\Adapter\SourceNotSetException;
 use DataView\Adapter\InvalidSourceException;
@@ -10,7 +10,7 @@ use DataView\Adapter\InvalidSourceException;
 /**
  * Doctrine ORM adapter
  */
-class DoctrineORM implements AdapterInterface
+class DoctrineORMAdapter implements AdapterInterface
 {
     protected $source, $tableName, $entityManager, $orderByPropertyPath, $pager = null;
     protected $columns = array();
@@ -219,7 +219,7 @@ class DoctrineORM implements AdapterInterface
 	public function getPager()
 	{
         if(!$this->pager) {
-		    $this->pager = new Pagerfanta(new DoctrineORMAdapter($this->getQuery()));
+		    $this->pager = new Pagerfanta(new PagerfantaDoctrineORMAdapter($this->getQuery()));
         }
 
         return $this->pager;
