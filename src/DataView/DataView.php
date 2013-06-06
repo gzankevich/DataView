@@ -16,6 +16,7 @@ class DataView
     private $orderByPropertyPath = null;
     private $filters = array();
     private $columns = array();
+    private $maxPerPage = 10;
 
     /**
      * Constructor
@@ -27,6 +28,16 @@ class DataView
     public function __construct(BaseAdapter $adapter)
     {
         $this->adapter = $adapter;
+    }
+
+    public function setMaxPerPage($maxPerPage)
+    {
+        $this->maxPerPage = $maxPerPage;
+    }
+
+    public function getMaxPerPage()
+    {
+        return $this->maxPerPage;
     }
 
     /**
@@ -160,6 +171,7 @@ class DataView
         $this->adapter->setFilters($this->getFilters());
 
         $pager = $this->adapter->getPager();
+        $pager->setMaxPerPage($this->getMaxPerPage());
 
         return $pager;
     }

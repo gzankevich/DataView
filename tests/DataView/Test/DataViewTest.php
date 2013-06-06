@@ -60,6 +60,7 @@ class DataViewTest extends BaseUnitTest
         $column = $this->getMockBuilder('\DataView\Column')->disableOriginalConstructor()->getMock();
 
         $pager = $this->getMockBuilder('\Pagerfanta\Pagerfanta')->disableOriginalConstructor()->getMock();
+        $pager->expects($this->once())->method('setMaxPerPage')->with($this->equalTo(10));
 
         $adapter = $this->getMockForAbstractClass('\DataView\Adapter\BaseAdapter', array(), '', false, true, true, array('setFilters', 'setColumns', 'getPager'));
         $adapter->expects($this->once())->method('setFilters')->with($this->equalTo(array()));
